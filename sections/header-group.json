@@ -17,7 +17,7 @@
         "announcement-1": {
           "type": "announcement",
           "settings": {
-            "text": "Free shipping on orders over $50",
+            "text": "United States",
             "link_text": "Shop now",
             "link_url": "/collections/all",
             "emoji": "🚚"
