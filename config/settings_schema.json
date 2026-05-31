@@ -34,27 +34,6 @@
     ]
   },
   {
-    "name": "t:general.typography",
-    "settings": [
-      {
-        "type": "header",
-        "content": "t:general.fonts"
-      },
-      {
-        "type": "font_picker",
-        "id": "type_heading_font",
-        "default": "work_sans_n4",
-        "label": "t:general.heading"
-      },
-      {
-        "type": "font_picker",
-        "id": "type_body_font",
-        "default": "work_sans_n4",
-        "label": "t:general.body"
-      },
-    ]
-  },
-  {
     "name": "t:general.layout",
     "settings": [
       {

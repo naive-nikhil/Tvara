@@ -11,12 +11,16 @@
       <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 32, height: 32 }}">
     {%- endif -%}
 
-    {%- unless settings.type_body_font.system? -%}
-      <link rel="preconnect" href="https://fonts.shopifycdn.com" crossorigin>
-    {%- endunless -%}
-    {%- unless settings.type_heading_font.system? -%}
-      <link rel="preconnect" href="https://fonts.shopifycdn.com" crossorigin>
-    {%- endunless -%}
+    {% comment %} Preload fonts {% endcomment %}
+    {{ 'articulatcf-bold.static.woff2' | asset_url | preload_tag: as: 'font' }}
+    {{ 'articulatcf-reg.static.woff2' | asset_url | preload_tag: as: 'font' }}
+    {{ 'base-mono-wide-thin.static.woff2' | asset_url | preload_tag: as: 'font' }}
+    {{ 'canela-light-italic.static.woff2' | asset_url | preload_tag: as: 'font' }}
+    {{ 'canela-light.static.woff2' | asset_url | preload_tag: as: 'font' }}
+    {{ 'canela-thin-static.woff2' | asset_url | preload_tag: as: 'font' }}
+    {{ 'geogrotesque-cond-bold.static.woff2' | asset_url | preload_tag: as: 'font' }}
+    {{ 'ringside-wide-book-italic.static.woff2' | asset_url | preload_tag: as: 'font' }}
+    {{ 'ringside-wide-book.static.woff2' | asset_url | preload_tag: as: 'font' }}
 
     {% # Inlined CSS Variables %}
     {% render 'css-variables' %}
@@ -42,8 +46,9 @@
       <script src="{{ 'swiper7.4.1.min.js' | asset_url }}" defer="defer"></script>
     {% endif %}
 
-    <script src="{{ 'alpinejs-persist@3.14.8.min.js' | asset_url }}" defer="defer"></script>
-    <script src="{{ 'alpinejs@3.14.8.min.js' | asset_url }}" defer="defer"></script>
+    {% comment %} Alpine.js {% endcomment %}
+    <script src="{{ 'alpine-persist@3.15.12.min.js' | asset_url }}" defer="defer"></script>
+    <script src="{{ 'alpine@3.15.12.min.js' | asset_url }}" defer="defer"></script>
     <script src="{{ 'theme.js' | asset_url }}" type="module"></script>
 
     {% comment %} liquid-ajax-cart.js.org {% endcomment %}

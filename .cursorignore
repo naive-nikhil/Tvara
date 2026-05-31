@@ -1,0 +1,32 @@
+# Exclude entire non-Shopify development environments
+node_modules/
+.git/
+.github/
+dist/
+build/
+.cache/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Exclude binary assets and fonts that LLMs cannot parse
+assets/*.png
+assets/*.jpg
+assets/*.jpeg
+assets/*.gif
+assets/*.webp
+assets/*.svg
+assets/*.woff
+assets/*.woff2
+assets/*.ttf
+assets/*.eot
+
+# Exclude dynamic local documentation & configs
+docs/
+*.log
+npm-debug.log*
+.env
+.env.*
+
+# Exclude massive translation files if not active
+locales/*.json

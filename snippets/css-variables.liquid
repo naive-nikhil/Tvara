@@ -10,21 +10,6 @@
   [x-cloak] {
     display: none !important;
   }
-  
-  {% # Loads all font variantions with display: swap %}
-  {{ settings.type_body_font | font_face: font_display: 'swap' }}
-  {{ settings.type_body_font | font_modify: 'weight', 'bold' | font_face: font_display: 'swap' }}
-  {{ settings.type_body_font | font_modify: 'weight', 'bold' | font_modify: 'style', 'italic' | font_face: font_display: 'swap' }}
-  {{ settings.type_body_font | font_modify: 'style', 'italic' | font_face: font_display: 'swap' }}
-
-  {{ settings.type_heading_font | font_face: font_display: 'swap' }}
-  {{ settings.type_heading_font | font_modify: 'weight', 'bold' | font_face: font_display: 'swap' }}
-  {{ settings.type_heading_font | font_modify: 'weight', 'bold' | font_modify: 'style', 'italic' | font_face: font_display: 'swap' }}
-  {{ settings.type_heading_font | font_modify: 'style', 'italic' | font_face: font_display: 'swap' }}
-
-
-
-
 
   {% for scheme in settings.color_schemes -%}
     {% assign scheme_classes = scheme_classes | append: ', .color-' | append: scheme.id %}
@@ -71,18 +56,101 @@
     background-color: rgb(var(--color-background));
   }
 
+  @font-face {
+    font-family: 'Articulat CF';
+    src: url('https://cdn.shopify.com/s/files/1/0424/9527/9254/files/articulatcf-reg.static.woff2?v=1770319859') format('woff2'),
+         url('https://cdn.shopify.com/s/files/1/0424/9527/9254/files/articulatcf-reg.static.woff?v=1770319859') format('woff');
+    font-weight: 400;
+    font-style: normal;
+    font-display: block;
+  }
+
+  @font-face {
+    font-family: 'Articulat CF';
+    src: url('https://cdn.shopify.com/s/files/1/0424/9527/9254/files/articulatcf-bold.static.woff2?v=1770319858') format('woff2'),
+         url('https://cdn.shopify.com/s/files/1/0424/9527/9254/files/articulatcf-bold.static.woff?v=1770319858') format('woff');
+    font-weight: 700;
+    font-style: normal;
+    font-display: block;
+  }
+
+  @font-face {
+    font-family: 'Base Mono';
+    src: url('{{ "base-mono-wide-thin.static.woff2" | asset_url }}') format('woff2');
+    font-weight: 550;
+    font-style: normal;
+    font-display: swap;
+  }
+
+   /* Canela */
+   @font-face {
+    font-family: 'Canela';
+    src: url('https://cdn.shopify.com/s/files/1/0424/9527/9254/files/canela-thin-static.woff2?v=1770319648') format('woff2'),
+         url('https://cdn.shopify.com/s/files/1/0424/9527/9254/files/canela-thin-static.woff?v=1770319649') format('woff');
+    font-weight: 300;
+    font-style: normal;
+    font-display: block;
+  }
+
+  @font-face {
+    font-family: 'Canela';
+    src: url('https://cdn.shopify.com/s/files/1/0424/9527/9254/files/canela-light.static.woff2?v=1770319647') format('woff2'),
+         url('https://cdn.shopify.com/s/files/1/0424/9527/9254/files/canela-light.static.woff?v=1770319646') format('woff');
+    font-weight: 300;
+    font-style: normal;
+    font-display: block;
+  }
+
+  @font-face {
+    font-family: 'Canela';
+    src: url('https://cdn.shopify.com/s/files/1/0424/9527/9254/files/canela-light-italic.static.woff2?v=1770319647') format('woff2'),
+         url('https://cdn.shopify.com/s/files/1/0424/9527/9254/files/canela-light-italic.static.woff?v=1770319648') format('woff');
+    font-weight: 300;
+    font-style: italic;
+    font-display: block;
+  }
+
+  /* Geogrotesque Cond */
+  @font-face {
+    font-family: 'Geogrotesque Cond';
+    src: url('https://cdn.shopify.com/s/files/1/0424/9527/9254/files/geogrotesque-cond-bold.static.woff2?v=1770319781') format('woff2'),
+         url('https://cdn.shopify.com/s/files/1/0424/9527/9254/files/geogrotesque-cond-bold.static.woff?v=1770319780') format('woff');
+    font-weight: 700;
+    font-style: normal;
+    font-display: block;
+  }
+
+  /* Ringside Wide */
+  @font-face {
+    font-family: 'Ringside Wide';
+    src: url('https://cdn.shopify.com/s/files/1/0424/9527/9254/files/ringside-wide-book.static.woff2?v=1770319199') format('woff2'),
+         url('https://cdn.shopify.com/s/files/1/0424/9527/9254/files/ringside-wide-book.static.woff?v=1770319198') format('woff');
+    font-weight: 325;
+    font-style: normal;
+    font-display: block;
+  }
+
+  @font-face {
+    font-family: 'Ringside Wide';
+    src: url('https://cdn.shopify.com/s/files/1/0424/9527/9254/files/ringside-wide-book-italic.static.woff2?v=1770319199') format('woff2'),
+         url('https://cdn.shopify.com/s/files/1/0424/9527/9254/files/ringside-wide-book-italic.static.woff?v=1770319200') format('woff');
+    font-weight: 325;
+    font-style: italic;
+    font-display: block;
+  }
 
   :root {
-    --font-body-family: {{ settings.type_body_font.family }}, {{ settings.type_body_font.fallback_families }};
-    --font-body-style: {{ settings.type_body_font.style }};
-    --font-body-weight: {{ settings.type_body_font.weight }};
-    --font-body-weight-bold: {{ settings.type_body_font.weight | plus: 300 | at_most: 900 }};
+    --font-body-family: 'Ringside Wide', 'system-ui', sans-serif;
+    --font-body-style: normal;
+    --font-body-weight: 400;
+    --font-body-weight-bold: 700;
     --font-body-scale: 1;
-    --font-heading-family: {{ settings.type_heading_font.family }}, {{ settings.type_heading_font.fallback_families }};
-    --font-heading-style: {{ settings.type_heading_font.style }};
-    --font-heading-weight: {{ settings.type_heading_font.weight }};
+    --font-heading-family: 'Geogrotesque Cond', 'ui-serif', serif;
+    --font-heading-style: normal;
+    --font-heading-weight: 700;
     --font-heading-scale: 1;
     --page-width: {{ settings.max_page_width }}px;
     --page-margin: {{ settings.min_page_margin }}px;
+    --font-mono-family: 'Base Mono', 'ui-monospace', monospace;
   }
 {% endstyle %}
