@@ -9,8 +9,6 @@
  */
 {
   "current": {
-    "type_heading_font": "roboto_condensed_n4",
-    "type_body_font": "roboto_condensed_n4",
     "max_page_width": 1600,
     "min_page_margin": 60,
     "cart_type": "drawer",
@@ -33,6 +31,8 @@
     "social_pinterest_link": "facebook.com",
     "social_tumblr_link": "",
     "social_vimeo_link": "",
+    "type_heading_font": "roboto_condensed_n4",
+    "type_body_font": "roboto_condensed_n4",
     "content_for_index": [],
     "color_schemes": {
       "scheme-1": {
