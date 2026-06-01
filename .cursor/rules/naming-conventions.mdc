@@ -30,9 +30,8 @@ alwaysApply: true
 ```
 
 ### Section JavaScript
-- **No inline `<script>` tags** in section `.liquid` files (see `AGENTS.md` §8).
-- Put behavior in `assets/section-[section-name].js` using custom elements.
-- Load scripts from `layout/theme.liquid` or via Shopify's `{% javascript %}` asset pipeline — not inline in sections.
+- **Non-trivial JS** goes in `assets/section-[section-name].js` as custom elements (`AGENTS.md` §5b). A minimal few-line inline `<script>` after the related markup is acceptable for one-off DOM work.
+- Load paired assets via `<script src="...">` from the section or `layout/theme.liquid`.
 
 **File naming:** `section-[section-name].js`
 
@@ -92,6 +91,6 @@ Each snippet must include a **component contract header** (comment block at top)
 
 ## Key Rules Summary
 1. **Sections:** No `main-` prefix for new sections
-2. **JavaScript:** Custom elements in paired `assets/*.js` — no inline scripts in Liquid
+2. **JavaScript:** Custom elements in paired `assets/*.js` for non-trivial behavior; minimal inline script per `AGENTS.md` §5b when appropriate
 3. **Naming:** Consistent prefixes (`section-` or `component-`)
 4. **File Types:** Match naming across `.liquid`, `.js`, and `.css` files (JS/CSS optional)

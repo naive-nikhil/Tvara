@@ -59,6 +59,7 @@ Rules for writing and updating descriptions:
 | `sections/search.liquid` | Renders search results with filter controls and a product/content grid. |
 | `sections/hero.liquid` | Renders the full-width homepage hero with image/video background and primary CTA. |
 | `sections/hero-v2.liquid` | Renders an alternate hero layout variant — split text/media composition. |
+| `sections/announcement-bar.liquid` | Renders market-filtered rotating promos (country/currency → block type), grid-stacked slides, section-level colors, and inline script for `--announcement-bar-height`. |
 | `sections/header-group.json` | Defines the header section group — controls which sections render in the header slot. |
 | `sections/footer-group.json` | Defines the footer section group — controls which sections render in the footer slot. |
 
@@ -230,5 +231,6 @@ Cursor IDE loads `.mdc` files automatically based on the `globs` pattern defined
 | Date | Changed by | What changed |
 |---|---|---|
 | Iteration 1 | Initial setup | File created — stub entries for all known files. Section and asset stubs need filling as codebase is confirmed. |
+| 2026-06-01 | Announcement bar agent | Added `sections/announcement-bar.liquid`; market block types, grid stable height, inline script for `--announcement-bar-height`. |
 
 > Every agent and developer appends a row here when they update the map.

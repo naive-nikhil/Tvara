@@ -10,8 +10,8 @@ alwaysApply: true
 
 ## JavaScript Practices
 
-- **Prefer Custom Elements over `DOMContentLoaded`**: Do not attach logic using `document.addEventListener('DOMContentLoaded', ...)`. Instead, wrap the relevant HTML in a custom element and implement a class that extends `HTMLElement` (register it with `customElements.define`).
-- **Avoid `DOMContentLoaded` entirely when possible**: Use `connectedCallback`/`disconnectedCallback` lifecycle hooks of your custom element to initialize and clean up behavior.
+- **Inline script vs Custom Elements (see `AGENTS.md` §5b)**: A few lines of one-off DOM work (e.g. setting a CSS variable from measured height) may stay as an inline `<script>` after the markup. Use Custom Elements in paired `assets/*.js` when behavior is non-trivial (listeners, state, cleanup, fetch).
+- **Never use `DOMContentLoaded`**: Do not attach logic with `document.addEventListener('DOMContentLoaded', ...)`. Inline scripts run after their markup; custom elements use `connectedCallback`/`disconnectedCallback`.
 - **Do not use jQuery**: Never add jQuery to the codebase. Prefer native browser APIs and/or Alpine.js (already included in `theme.liquid`) for light interactivity and state.
 
 ## Formatting and Readability
@@ -26,8 +26,8 @@ alwaysApply: true
 ## Quick Checklist
 
 - `theme.liquid` is <= ~300 lines and delegates to snippets/sections
-- No new uses of `DOMContentLoaded`; behavior lives in custom elements
-- Custom elements extend `HTMLElement` and are registered once
+- No new uses of `DOMContentLoaded`
+- Non-trivial behavior uses custom elements (`HTMLElement`, registered once); minimal logic may use inline script per AGENTS.md §5b
 - Code is consistently indented and formatted
 - No commented-out code left behind
 

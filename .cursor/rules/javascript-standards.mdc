@@ -8,7 +8,7 @@ alwaysApply: false
 
 ## Tvara-specific constraints
 
-- **No `<script>` tags in section/snippet `.liquid` files** — JS lives in paired `assets/section-*.js` or `assets/component-*.js`. Script tags for theme assets belong in `layout/theme.liquid` only.
+- **JS placement (`AGENTS.md` §5b)** — Non-trivial behavior lives in paired `assets/section-*.js` or `assets/component-*.js` as Custom Elements. A minimal inline `<script>` (few lines, no lifecycle) after the related markup is acceptable (e.g. one-off CSS variable from measured height). `<script src="...">` for theme assets belongs in `layout/theme.liquid` or at the section level when loading a paired asset file.
 - **Reactive state** — use Alpine stores (`$store`). Do not use `querySelector` / `getElementById` to read or write cart counts, prices, or other reactive UI state.
 - **Local DOM inside custom elements** — `querySelector` within a custom element's `connectedCallback` is fine for wiring that element's own children.
 - **Cart mutations** — use `liquid-ajax-cart.js` events/API; never `fetch('/cart/add.js')` or `fetch('/cart/update.js')` directly.
@@ -153,7 +153,7 @@ if (!customElements.get('product-info')) {
   </quantity-selector>
 </product-info>
 
-<!-- Script loaded from layout/theme.liquid — not inline in sections/snippets (AGENTS.md §8) -->
+<!-- Non-trivial JS: load paired asset from section or layout/theme.liquid (AGENTS.md §5b) -->
 ```
 
 Load paired JS from `layout/theme.liquid`:

@@ -1,7 +1,81 @@
 {% comment %}
-  Announcement Bar Section
-  - Displays a customizable announcement message with an optional link and emoji.
+  Section: Announcement Bar
+  File: sections/announcement-bar.liquid
+
+  Renders rotating promos for the active market (localization country/currency).
+  Block types: us, cad, uk, eur, bulgaria, czech_republic, denmark, hungary, poland, romania, sweden, aud, nzd.
+  Legacy US types: announcement_us, announcement.
+
+  Stores: none (Alpine local state: idx, total, interval)
+  CSS API: .announcement-bar, .announcement-bar__content, .announcement-bar__message, .announcement-bar__slide, .announcement-bar__text
+  Sets: --announcement-bar-height via inline script + ResizeObserver
 {% endcomment %}
+
+{% liquid
+  assign country_iso = localization.country.iso_code | upcase
+  assign currency_iso = localization.country.currency.iso_code | upcase
+  assign announcement_market_type = 'us'
+
+  case country_iso
+    when 'CA'
+      assign announcement_market_type = 'cad'
+    when 'GB'
+      assign announcement_market_type = 'uk'
+    when 'AU'
+      assign announcement_market_type = 'aud'
+    when 'NZ'
+      assign announcement_market_type = 'nzd'
+    when 'BG'
+      assign announcement_market_type = 'bulgaria'
+    when 'CZ'
+      assign announcement_market_type = 'czech_republic'
+    when 'DK'
+      assign announcement_market_type = 'denmark'
+    when 'HU'
+      assign announcement_market_type = 'hungary'
+    when 'PL'
+      assign announcement_market_type = 'poland'
+    when 'RO'
+      assign announcement_market_type = 'romania'
+    when 'SE'
+      assign announcement_market_type = 'sweden'
+    when 'US'
+      assign announcement_market_type = 'us'
+  endcase
+
+  if announcement_market_type == 'us' and currency_iso == 'EUR'
+    assign announcement_market_type = 'eur'
+  endif
+
+  assign visible_count = 0
+
+  for block in section.blocks
+    assign block_market_key = block.type
+    if block.type == 'announcement_us' or block.type == 'announcement'
+      assign block_market_key = 'us'
+    endif
+
+    if block_market_key == announcement_market_type and block.settings.text != blank
+      assign visible_count = visible_count | plus: 1
+    endif
+  endfor
+
+  if visible_count == 0 and announcement_market_type != 'us'
+    assign announcement_market_type = 'us'
+    assign visible_count = 0
+
+    for block in section.blocks
+      assign block_market_key = block.type
+      if block.type == 'announcement_us' or block.type == 'announcement'
+        assign block_market_key = 'us'
+      endif
+
+      if block_market_key == 'us' and block.settings.text != blank
+        assign visible_count = visible_count | plus: 1
+      endif
+    endfor
+  endif
+%}
 
 {% style %}
   #shopify-section-{{ section.id }} {
@@ -15,7 +89,7 @@
   }
 
   .announcement-bar {
-    padding: 0.5rem 0;
+    padding-block: 7px;
     text-align: center;
   }
 
@@ -25,29 +99,27 @@
     align-items: center;
     gap: 2rem;
     position: relative;
-    height: 3.5rem;
   }
 
   .announcement-bar__arrow {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 3.2rem;
-    height: 3.2rem;
     background: none;
     border: none;
     color: inherit;
     cursor: pointer;
-    padding: 0;
+    padding: 4px;
     border-radius: 50%;
     transition: opacity 0.2s ease, background-color 0.2s ease;
     flex-shrink: 0;
   }
 
   .announcement-bar__arrow svg {
-    width: 1.6rem;
-    height: 1.6rem;
+    width: 13px;
+    height: 13px;
     display: block;
+    flex-shrink: 0;
   }
 
   .announcement-bar__arrow:hover {
@@ -61,65 +133,85 @@
 
   .announcement-bar__message {
     flex: 1;
+    min-width: 0;
     margin: 0;
+    display: grid;
+    align-items: center;
+    justify-items: center;
+  }
+
+  .announcement-bar__slide {
+    grid-area: 1 / 1;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    visibility: hidden;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .announcement-bar__slide--active {
+    visibility: visible;
+    pointer-events: auto;
+    z-index: 1;
+  }
+
+  .announcement-bar__text {
+    font-family: 'Articulat CF', sans-serif;
     font-size: 1.4rem;
-    font-weight: 500;
+    font-weight: 400;
     line-height: 1.5;
     letter-spacing: 0.04em;
-    white-space: normal;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.8rem;
-    flex-wrap: wrap;
   }
 
-  .announcement-bar__message > div {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.8rem;
-    flex-wrap: wrap;
+  .announcement-bar__text p {
+    margin: 0;
   }
 
-  .announcement-bar__link {
+  .announcement-bar__text strong,
+  .announcement-bar__text b {
+    font-weight: 700;
+  }
+
+  .announcement-bar__text a {
+    color: inherit;
     text-decoration: underline;
     text-underline-offset: 0.3rem;
     text-decoration-thickness: 0.1rem;
     transition: text-decoration-thickness 0.2s ease;
-    white-space: nowrap;
   }
 
-  .announcement-bar__link:hover {
+  .announcement-bar__text a:hover {
     text-decoration-thickness: 0.2rem;
   }
 
-  .announcement-bar__emoji {
-    font-size: 1.6rem;
-    line-height: 1;
-    margin-left: 0.4rem;
+  .announcement-bar__text--mobile {
+    display: none;
   }
 
-  .fade-in {
-    animation: fadeInAnim 0.3s ease-in-out;
+  .announcement-bar__slide--active.fade-in {
+    animation: announcementFadeSlide 0.3s ease-in-out;
   }
 
-  @keyframes fadeInAnim {
+  @keyframes announcementFadeSlide {
     from {
       opacity: 0;
-      transform: translateY(-0.4rem);
+      transform: translateX(1.2rem);
     }
     to {
       opacity: 1;
-      transform: translateY(0);
+      transform: translateX(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .announcement-bar__slide--active.fade-in {
+      animation: none;
     }
   }
 
   @media (max-width: 768px) {
-    .announcement-bar {
-      padding: 1.2rem 1.5rem;
-    }
-
     .announcement-bar__content {
       gap: 0;
     }
@@ -128,43 +220,28 @@
       display: none;
     }
 
-    .announcement-bar__message {
+    .announcement-bar__text {
       font-size: 1.3rem;
-      gap: 0.6rem;
     }
 
-    .announcement-bar__emoji {
-      font-size: 1.4rem;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .announcement-bar {
-      padding: 1rem 1.2rem;
+    .announcement-bar__text--desktop:has(+ .announcement-bar__text--mobile) {
+      display: none;
     }
 
-    .announcement-bar__message {
-      font-size: 1.2rem;
-    }
-
-    .announcement-bar__link {
-      text-underline-offset: 0.2rem;
+    .announcement-bar__text--mobile {
+      display: block;
     }
   }
 {% endstyle %}
 
-{%- liquid
-  assign text_color = section.settings.text_color
--%}
-
-{% if section.settings.show_announcement and section.blocks.size > 0 %}
+{% if section.settings.show_announcement and visible_count > 0 %}
   <section class="announcement-bar-section">
     <div
       class="announcement-bar"
       x-data="
         {
           idx: 0,
-          total: {{ section.blocks.size }},
+          total: {{ visible_count }},
           interval: null,
           startAutoScroll() {
             if (this.total > 1) {
@@ -188,67 +265,83 @@
       @focusout="startAutoScroll()"
     >
       <div class="page-width announcement-bar__content">
-        {% if section.blocks.size > 1 %}
+        {% if visible_count > 1 %}
           <button
             @click="idx = idx === 0 ? total - 1 : idx - 1"
             aria-label="Previous announcement"
             class="announcement-bar__arrow announcement-bar__arrow--prev"
-            x-show="total > 1"
             type="button"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+              <path d="M8.5 1.5L3.5 6L8.5 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </button>
         {% endif %}
 
-        <div class="announcement-bar__message">
+        <div class="announcement-bar__message" aria-live="polite" aria-atomic="true">
+          {% assign slide_index = -1 %}
           {% for block in section.blocks %}
-            <div
-              {{ block.shopify_attributes }}
-              x-show="idx === {{ forloop.index0 }}"
-              x-transition:fade.300ms
-              {% unless forloop.first %}
-                style="display: none;"
-              {% endunless %}
-              :class="idx === {{ forloop.index0 }} ? 'fade-in' : ''"
-            >
-              {{ block.settings.text }}
-              {% if block.settings.link_text and block.settings.link_url %}
-                <a href="{{ block.settings.link_url }}" class="announcement-bar__link" style="color: {{ text_color }};">
-                  {{ block.settings.link_text }}
-                </a>
-              {% endif %}
-              {% if block.settings.emoji != blank %}
-                <span class="announcement-bar__emoji">{{ block.settings.emoji }}</span>
-              {% endif %}
-            </div>
+            {% liquid
+              assign block_market_key = block.type
+              if block.type == 'announcement_us' or block.type == 'announcement'
+                assign block_market_key = 'us'
+              endif
+            %}
+            {% if block_market_key == announcement_market_type and block.settings.text != blank %}
+              {% assign slide_index = slide_index | plus: 1 %}
+              <div
+                {{ block.shopify_attributes }}
+                class="announcement-bar__slide"
+                :class="{
+                  'announcement-bar__slide--active': idx === {{ slide_index }},
+                  'fade-in': idx === {{ slide_index }}
+                }"
+                :aria-hidden="idx !== {{ slide_index }}"
+              >
+                <div class="announcement-bar__text announcement-bar__text--desktop">
+                  {{ block.settings.text }}
+                </div>
+                {% if block.settings.text_mobile != blank %}
+                  <div class="announcement-bar__text announcement-bar__text--mobile">
+                    {{ block.settings.text_mobile }}
+                  </div>
+                {% endif %}
+              </div>
+            {% endif %}
           {% endfor %}
         </div>
 
-        {% if section.blocks.size > 1 %}
+        {% if visible_count > 1 %}
           <button
             @click="idx = idx === total - 1 ? 0 : idx + 1"
             aria-label="Next announcement"
             class="announcement-bar__arrow announcement-bar__arrow--next"
-            x-show="total > 1"
             type="button"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+              <path d="M3.5 1.5L8.5 6L3.5 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </button>
         {% endif %}
       </div>
     </div>
   </section>
-{% endif %}
 
-<script>
-  const announcementBar = document.querySelector('.announcement-bar__content');
-  const announcementBarHeight = announcementBar.offsetHeight;
-  document.documentElement.style.setProperty('--announcement-bar-height', `${announcementBarHeight}px`);
-</script>
+  <script>
+    const announcementBar = document.querySelector('#shopify-section-{{ section.id }} .announcement-bar__content');
+    if (announcementBar) {
+      const setAnnouncementBarHeight = () => {
+        document.documentElement.style.setProperty('--announcement-bar-height', `${announcementBar.offsetHeight}px`);
+      };
+
+      setAnnouncementBarHeight();
+
+      if ('ResizeObserver' in window) {
+        new ResizeObserver(setAnnouncementBarHeight).observe(announcementBar);
+      }
+    }
+  </script>
+{% endif %}
 
 {% schema %}
 {
@@ -266,19 +359,19 @@
     {
       "type": "color",
       "id": "background_color",
-      "label": "Background color",
+      "label": "Background Color",
       "default": "#000000"
     },
     {
       "type": "color",
       "id": "text_color",
-      "label": "Text color",
+      "label": "Text Color",
       "default": "#FFFFFF"
     },
     {
       "type": "range",
       "id": "auto_rotate_interval",
-      "label": "Auto-rotate interval (seconds)",
+      "label": "Auto-rotate Interval (Seconds)",
       "min": 2,
       "max": 15,
       "step": 1,
@@ -287,31 +380,120 @@
   ],
   "blocks": [
     {
-      "type": "announcement",
-      "name": "Announcement",
+      "type": "us",
+      "name": "Default - US",
+      "limit": 5,
       "settings": [
-        {
-          "type": "text",
-          "id": "text",
-          "label": "Text",
-          "default": "Welcome to our store"
-        },
-        {
-          "type": "text",
-          "id": "link_text",
-          "label": "Link text"
-        },
-        {
-          "type": "url",
-          "id": "link_url",
-          "label": "Link URL"
-        },
-        {
-          "type": "text",
-          "id": "emoji",
-          "label": "Emoji",
-          "default": "🎉"
-        }
+        { "type": "richtext", "id": "text", "label": "Text (Desktop)", "default": "<p>Welcome to our store</p>" },
+        { "type": "richtext", "id": "text_mobile", "label": "Text (Mobile)", "info": "Optional. Uses desktop text on mobile when empty." }
+      ]
+    },
+    {
+      "type": "cad",
+      "name": "CAD",
+      "limit": 5,
+      "settings": [
+        { "type": "richtext", "id": "text", "label": "Text (Desktop)", "default": "<p></p>" },
+        { "type": "richtext", "id": "text_mobile", "label": "Text (Mobile)", "info": "Optional. Uses desktop text on mobile when empty." }
+      ]
+    },
+    {
+      "type": "uk",
+      "name": "UK",
+      "limit": 5,
+      "settings": [
+        { "type": "richtext", "id": "text", "label": "Text (Desktop)", "default": "<p></p>" },
+        { "type": "richtext", "id": "text_mobile", "label": "Text (Mobile)", "info": "Optional. Uses desktop text on mobile when empty." }
+      ]
+    },
+    {
+      "type": "eur",
+      "name": "EUR",
+      "limit": 5,
+      "settings": [
+        { "type": "richtext", "id": "text", "label": "Text (Desktop)", "default": "<p></p>" },
+        { "type": "richtext", "id": "text_mobile", "label": "Text (Mobile)", "info": "Optional. Uses desktop text on mobile when empty." }
+      ]
+    },
+    {
+      "type": "bulgaria",
+      "name": "Bulgaria",
+      "limit": 5,
+      "settings": [
+        { "type": "richtext", "id": "text", "label": "Text (Desktop)", "default": "<p></p>" },
+        { "type": "richtext", "id": "text_mobile", "label": "Text (Mobile)", "info": "Optional. Uses desktop text on mobile when empty." }
+      ]
+    },
+    {
+      "type": "czech_republic",
+      "name": "Czech Republic",
+      "limit": 5,
+      "settings": [
+        { "type": "richtext", "id": "text", "label": "Text (Desktop)", "default": "<p></p>" },
+        { "type": "richtext", "id": "text_mobile", "label": "Text (Mobile)", "info": "Optional. Uses desktop text on mobile when empty." }
+      ]
+    },
+    {
+      "type": "denmark",
+      "name": "Denmark",
+      "limit": 5,
+      "settings": [
+        { "type": "richtext", "id": "text", "label": "Text (Desktop)", "default": "<p></p>" },
+        { "type": "richtext", "id": "text_mobile", "label": "Text (Mobile)", "info": "Optional. Uses desktop text on mobile when empty." }
+      ]
+    },
+    {
+      "type": "hungary",
+      "name": "Hungary",
+      "limit": 5,
+      "settings": [
+        { "type": "richtext", "id": "text", "label": "Text (Desktop)", "default": "<p></p>" },
+        { "type": "richtext", "id": "text_mobile", "label": "Text (Mobile)", "info": "Optional. Uses desktop text on mobile when empty." }
+      ]
+    },
+    {
+      "type": "poland",
+      "name": "Poland",
+      "limit": 5,
+      "settings": [
+        { "type": "richtext", "id": "text", "label": "Text (Desktop)", "default": "<p></p>" },
+        { "type": "richtext", "id": "text_mobile", "label": "Text (Mobile)", "info": "Optional. Uses desktop text on mobile when empty." }
+      ]
+    },
+    {
+      "type": "romania",
+      "name": "Romania",
+      "limit": 5,
+      "settings": [
+        { "type": "richtext", "id": "text", "label": "Text (Desktop)", "default": "<p></p>" },
+        { "type": "richtext", "id": "text_mobile", "label": "Text (Mobile)", "info": "Optional. Uses desktop text on mobile when empty." }
+      ]
+    },
+    {
+      "type": "sweden",
+      "name": "Sweden",
+      "limit": 5,
+      "settings": [
+        { "type": "richtext", "id": "text", "label": "Text (Desktop)", "default": "<p></p>" },
+        { "type": "richtext", "id": "text_mobile", "label": "Text (Mobile)", "info": "Optional. Uses desktop text on mobile when empty." }
+      ]
+    },
+    {
+      "type": "aud",
+      "name": "AUD",
+      "limit": 5,
+      "settings": [
+        { "type": "richtext", "id": "text", "label": "Text (Desktop)", "default": "<p></p>" },
+        { "type": "richtext", "id": "text_mobile", "label": "Text (Mobile)", "info": "Optional. Uses desktop text on mobile when empty." }
+      ]
+    },
+    {
+      "type": "nzd",
+      "name": "NZD",
+      "limit": 5,
+      "settings": [
+        { "type": "richtext", "id": "text", "label": "Text (Desktop)", "default": "<p></p>" },
+        { "type": "richtext", "id": "text_mobile", "label": "Text (Mobile)", "info": "Optional. Uses desktop text on mobile when empty." }
       ]
     }
   ],
@@ -319,9 +501,7 @@
     {
       "name": "Announcement Bar",
       "blocks": [
-        {
-          "type": "announcement"
-        }
+        { "type": "us" }
       ]
     }
   ]

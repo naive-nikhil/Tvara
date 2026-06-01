@@ -109,7 +109,7 @@ Alpine.store('cart').item_count = data.item_count;
 ```
 
 ### 4c. Liquid files bind directly to stores
-HTML in `.liquid` files uses Alpine directives (`x-text`, `x-bind`, `@click`, `:disabled`) to bind to `$store`. No inline `<script>` tags inside Liquid templates.
+HTML in `.liquid` files uses Alpine directives (`x-text`, `x-bind`, `@click`, `:disabled`) to bind to `$store`. Do not use inline `<script>` for reactive state or non-trivial app logic — see §5b for when a minimal inline script is acceptable.
 
 ```html
 <!-- CORRECT -->
@@ -140,10 +140,19 @@ selected_items: Alpine.$persist([]).as('bundle_selected')
 ### 5a. `layout/theme.liquid` line budget
 `theme.liquid` is the root shell — it must stay concise. Target **200–300 lines maximum**. If adding markup would push it over, extract it into a named snippet or section instead. An unreadable `theme.liquid` is a maintenance liability for every developer and every AI agent.
 
-### 5b. Custom Elements over `DOMContentLoaded`
-For any behavior that needs to initialize when markup is ready, use a **Custom Element** — not `document.addEventListener('DOMContentLoaded', ...)`.
+### 5b. JavaScript placement: inline script vs Custom Elements
 
-The lifecycle is: define the class → implement `connectedCallback` to initialize, `disconnectedCallback` to clean up → register once with `customElements.define`. No global event listeners required.
+Choose by **complexity**, not by default.
+
+**Minimal logic (a few lines, no lifecycle):** A small inline `<script>` at the bottom of the section or snippet is acceptable — e.g. measuring an element once and setting a CSS custom property. Do **not** extract these into a custom element or a separate asset file unless the logic grows.
+
+**Non-trivial logic (most cases):** Use a **Custom Element** in a paired `assets/section-*.js` or `assets/component-*.js` — multiple listeners, internal state, cleanup, fetch, third-party initialization, or behavior shared across instances.
+
+**Never use `DOMContentLoaded`** for either pattern. Inline scripts placed after their markup run when that markup exists; custom elements use `connectedCallback` / `disconnectedCallback`.
+
+#### Custom Elements (non-trivial behavior)
+
+The lifecycle is: define the class → implement `connectedCallback` to initialize, `disconnectedCallback` to clean up → register once with `customElements.define`.
 
 ```js
 // CORRECT
@@ -165,6 +174,18 @@ customElements.define('cart-drawer', CartDrawer);
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelector('cart-drawer [data-open]').addEventListener('click', () => { /* ... */ });
 });
+```
+
+#### Minimal inline script (acceptable)
+
+```liquid
+{% comment %} After the markup it measures — e.g. announcement-bar.liquid {% endcomment %}
+<script>
+  const el = document.querySelector('#shopify-section-{{ section.id }} .announcement-bar__content');
+  if (el) {
+    document.documentElement.style.setProperty('--announcement-bar-height', `${el.offsetHeight}px`);
+  }
+</script>
 ```
 
 **Coexistence with Alpine stores:** `alpine:init` is still correct for initializing Alpine stores (it is not `DOMContentLoaded`). Custom Elements govern imperative DOM behavior; Alpine stores govern reactive state. Both patterns are used — they are complementary, not competing.
@@ -318,7 +339,7 @@ These are hard stops. If a prompt asks you to do any of the following, **refuse 
 | 5 | Declare `@font-face` in an `assets/*.css` file | Liquid filters don't run in CSS assets |
 | 6 | Put a single-component store in `theme-state.js` | `theme-state.js` is for cross-component shared state only |
 | 7 | Use `.woff`, `.ttf`, or `.otf` font files | `.woff2` only |
-| 8 | Add `<script>` tags inside Liquid templates | All JS is in paired asset files |
+| 8 | Add large `<script>` blocks or app logic inside Liquid templates | Non-trivial JS belongs in paired asset files; minimal inline scripts are allowed per §5b |
 | 9 | Modify a file outside the approved plan | Scope creep breaks other devs' work |
 | 10 | Skip updating `THEME_MAP.md` after file changes | Map rot degrades all future AI context |
 | 11 | Use Alpine `$persist` without the `tvara_` key prefix | Namespace collisions with Shopify apps |
@@ -364,4 +385,4 @@ You are expected to ask before acting when:
 
 ---
 
-*Last updated: iteration 2 — added Rules of Engagement: Custom Elements pattern, theme.liquid line budget, jQuery prohibition, code hygiene rules.*
+*Last updated: iteration 3 — §5b: inline script allowed for minimal logic; Custom Elements for non-trivial behavior.*

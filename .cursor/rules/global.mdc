@@ -19,8 +19,8 @@ alwaysApply: true
 - No CDN URLs — all JS/CSS/fonts served from `assets/`.
 - Cart AJAX via `liquid-ajax-cart.js` only — no direct `fetch('/cart/add.js')`.
 - Alpine stores for reactive state — no `querySelector` to sync cart/UI state.
-- No `<script>` tags in section/snippet `.liquid` files — JS lives in paired `assets/*.js`.
-- Custom Elements over `DOMContentLoaded` for imperative DOM behavior.
+- Non-trivial JS in paired `assets/*.js` (Custom Elements); minimal few-line inline `<script>` in sections/snippets is OK per `AGENTS.md` §5b.
+- Never `DOMContentLoaded` — inline script after markup, or Custom Element `connectedCallback`.
 - CSS tokens in `snippets/css-variables.liquid` — no Liquid in `assets/*.css`.
 - `@font-face` only in `layout/theme.liquid` — `.woff2` only.
 - Update `THEME_MAP.md` after every file create/rename/delete (part of the task).

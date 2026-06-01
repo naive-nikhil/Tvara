@@ -14,28 +14,15 @@
     "announcement-bar": {
       "type": "announcement-bar",
       "blocks": {
-        "announcement-1": {
-          "type": "announcement",
+        "announcement-us": {
+          "type": "us",
           "settings": {
-            "text": "United States",
-            "link_text": "Shop now",
-            "link_url": "/collections/all",
-            "emoji": "🚚"
-          }
-        },
-        "announcement-2": {
-          "type": "announcement",
-          "settings": {
-            "text": "New arrivals just landed",
-            "link_text": "View collection",
-            "link_url": "/collections/new-arrivals",
-            "emoji": "✨"
+            "text": "<p>United States <a href=\"/collections/all\">Shop now</a> 🚚</p>"
           }
         }
       },
       "block_order": [
-        "announcement-1",
-        "announcement-2"
+        "announcement-us"
       ],
       "settings": {
         "show_announcement": true,
