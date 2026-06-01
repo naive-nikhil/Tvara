@@ -10,3 +10,11 @@ The assets directory contains any assets that need to be referenced within a `.l
 Assets is a flat directory, it may not contain subdirectories.
 
 Any images that are required in the code, including icons, may be stored within assets.  Icons can be used in `.liquid` files via the [inline_asset_content](mdc:https:/shopify.dev/docs/api/liquid/filters/inline_asset_content) Liquid filter.
+
+## Tvara constraints (see AGENTS.md)
+
+- **No CDN URLs** — Alpine, Swiper, fonts, and all libraries are local files in `assets/`.
+- **Domain-scoped JS/CSS only** — `section-{name}.*` or `component-{name}.*`; no `utils.js` or catch-all files.
+- **Static CSS** — `assets/*.css` cannot use Liquid. Tokens belong in `snippets/css-variables.liquid`.
+- **`@font-face`** — declare only in `layout/theme.liquid`, never in asset CSS files.
+- **Cart AJAX** — use `liquid-ajax-cart.js`; do not call cart endpoints directly from component JS.

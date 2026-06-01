@@ -34,8 +34,8 @@ Blocks render in the editor and storefront when they are referenced in [template
   /*
     Scoped CSS for this block
 
-    Use BEM structure
-    CSS written in here should be for components that are exclusively in this block.  If the CSS will be used elsewhere, it should instead be written in [assets/base.css](mdc:@assets/base.css)
+    Use BEM structure.
+    CSS used elsewhere should live in assets/section-{name}.css or assets/component-{name}.css — not a shared base.css.
   */
 {% endstylesheet %}
 

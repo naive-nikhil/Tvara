@@ -65,4 +65,4 @@ locales/
 
 **Schema Translations:**
 
-Use the rules outlined in our [typescript schema](schemas/schema.d.ts) to determine the appropriate key structure for schema translations.
+Use hierarchical `t:` keys in schema labels when locale files exist. Follow the same key structure as `locales/en.default.json` once added.

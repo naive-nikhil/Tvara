@@ -1,0 +1,33 @@
+---
+description: Universal Tvara rules — defers to AGENTS.md and THEME_MAP.md
+globs: **/*
+alwaysApply: true
+---
+
+# Tvara Global Rules
+
+**Authority:** `AGENTS.md` is the authoritative contract. `THEME_MAP.md` is the file registry. These rules reinforce both — they do not override them.
+
+## Before any task
+
+1. Read `AGENTS.md` (RPI protocol).
+2. Read `THEME_MAP.md` for every file you will touch.
+3. Wait for explicit approval before implementing (Phase 2 of RPI).
+
+## Non-negotiables (from AGENTS.md)
+
+- No CDN URLs — all JS/CSS/fonts served from `assets/`.
+- Cart AJAX via `liquid-ajax-cart.js` only — no direct `fetch('/cart/add.js')`.
+- Alpine stores for reactive state — no `querySelector` to sync cart/UI state.
+- No `<script>` tags in section/snippet `.liquid` files — JS lives in paired `assets/*.js`.
+- Custom Elements over `DOMContentLoaded` for imperative DOM behavior.
+- CSS tokens in `snippets/css-variables.liquid` — no Liquid in `assets/*.css`.
+- `@font-face` only in `layout/theme.liquid` — `.woff2` only.
+- Update `THEME_MAP.md` after every file create/rename/delete (part of the task).
+
+## Naming
+
+- Sections: `sections/{name}.liquid` — no `main-` prefix.
+- Snippets: `snippets/component-{name}.liquid`.
+- Assets: `assets/section-{name}.js|css` or `assets/component-{name}.js|css`.
+- BEM class names matching the component block name.

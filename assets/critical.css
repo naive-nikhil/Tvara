@@ -16,6 +16,7 @@ html {
   box-sizing: border-box;
   font-size: 62.5%;
   height: 100%;
+  scrollbar-gutter: stable;
 }
 
 html:has(dialog[scroll-lock][open], details[scroll-lock][open]) {

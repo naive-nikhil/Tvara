@@ -1,13 +1,15 @@
 ---
 description:
-globs: blocks/*.liquid,sections/*.liquid,schemas/*
+globs: blocks/*.liquid,sections/*.liquid
 alwaysApply: false
 ---
 # Schema Standards
 
+> Defers to `AGENTS.md`. Schemas live inline in `.liquid` files in this theme.
+
 Every section and block must include a `{% schema %}` tag with valid JSON structure.
 
-We write our schemas in the schemas folder and then run `npm run build:schemas` to push them to the `.liquid` files.  This allows us to take advantage of Typescript for validation and reuse parts of schemas to avoid re-writing them many times.
+Schemas are written **directly** in `sections/*.liquid` and `blocks/*.liquid`. There is no separate `schemas/` build step in Tvara.
 
 ## Schema Structure
 ```json

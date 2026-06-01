@@ -5,10 +5,12 @@ alwaysApply: false
 ---
 # Localization Standards
 
+> Defers to `AGENTS.md`. The `locales/` folder may be empty during early development.
+
 ## Translation Requirements
 
-- **Every user-facing text** must use translation filters
-- **Update `locales/en.default.json`** with all new keys
+- **Every user-facing text** should use translation filters once `locales/en.default.json` exists
+- **Update `locales/en.default.json`** with all new keys when i18n is active
 - **Use descriptive, hierarchical keys** for organization
 - **Only add English text** - translators handle other languages
 

@@ -5,30 +5,25 @@ alwaysApply: false
 ---
 # Snippet Development Standards
 
+> Defers to `THEME_MAP.md` for the component contract header format.
+
 ## Snippet Documentation
 
-Every snippet must include JSDoc-style comments using LiquidDoc:
+Every snippet must include a **component contract header** — a comment block at the top of the file documenting props, Alpine store dependencies, and CSS API (BEM block/classes). This is the authoritative detail; `THEME_MAP.md` holds the discoverability entry.
 
 ```liquid
-{% doc %}
-  Product Card Component
+{% comment %}
+  Component: Product Card
+  File: snippets/component-product-card.liquid
 
-  Renders a product card with customizable options.
+  Props:
+    - product {Object} required
+    - show_vendor {Boolean} default false
+    - card_class {String} optional extra classes
 
-  @param product {Object} Product object (required)
-  @param show_vendor {Boolean} Display vendor name (default: false)
-  @param show_quick_add {Boolean} Show quick add button (default: false)
-  @param image_ratio {String} Image aspect ratio (default: 'adapt')
-  @param lazy_load {Boolean} Enable lazy loading (default: true)
-  @param card_class {String} Additional CSS classes
-
-  @example
-    {% render 'product-card',
-       product: product,
-       show_vendor: true,
-       image_ratio: 'square'
-    %}
-{% enddoc %}
+  Stores: none
+  CSS API: .product-card, .product-card__image, .product-card__title
+{% endcomment %}
 ```
 
 ## Parameter Handling

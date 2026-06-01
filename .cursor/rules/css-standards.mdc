@@ -6,6 +6,14 @@ alwaysApply: false
 
 # CSS Standards
 
+> Defers to `AGENTS.md` §5e–§5f and §6 for BEM, tokens, and typography.
+
+## Tvara-specific constraints
+
+- **Global CSS variables** live in `snippets/css-variables.liquid` (rendered in `layout/theme.liquid`). Do not use `theme-styles-variables.liquid` — that file does not exist in this theme.
+- **`assets/*.css` is static** — Liquid filters do not run. Never put `{{ ... }}` or `@font-face` with `asset_url` in asset CSS. Use custom properties from `css-variables.liquid` instead.
+- **`@font-face`** — only in `<style>` blocks inside `layout/theme.liquid`. Font files: `.woff2` only.
+
 ## Specificity Rules
 
 - **Never** use IDs as selectors
@@ -27,12 +35,12 @@ CSS variables, a.k.a. custom properties, are a powerful tool for reducing redund
 
 ### Global Variables
 
-Global variables should be scoped to the `:root` selector in `snippets/theme-styles-variables.liquid`.
+Global variables should be scoped to the `:root` selector in `snippets/css-variables.liquid`.
 
 **Example of global variables**
 
 ```css
-/* in snippets/theme-styles-variables.liquid */
+/* in snippets/css-variables.liquid */
 :root {
     --page-width: 1400px;
      --font-body--family: {{ settings.type_body_font.family }}, {{ settings.type_body_font.fallback_families }}; /* Referencing a theme setting */

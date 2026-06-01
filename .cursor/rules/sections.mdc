@@ -5,14 +5,16 @@ alwaysApply: false
 ---
 # Section Development Standards
 
+> Defers to `AGENTS.md`. Follow RPI before editing sections.
+
 ## Section Requirements
 
 Every section must include:
 
 - `{% schema %}` tag with valid JSON
 - Proper HTML semantic structure
-- CSS scoping with section classes
-- Translation keys for all text
+- CSS scoping with section classes (prefer `assets/section-{name}.css` or scoped variables)
+- Translation keys for user-facing text **when `locales/` is in use** — the folder may be empty during early development; hardcoded English is acceptable until i18n is set up
 
 ## Section Patterns
 

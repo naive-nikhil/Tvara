@@ -16,12 +16,12 @@ These are strictly for UX improvements that are non-blocking for conversions.
 **Expandable Content:**
 - Use `<details>` and `<summary>` instead of JavaScript toggles
 - Perfect for FAQs, product details, filters
-- See the [accordion component](mdc:assets/accordion-custom.js) for cases where animation is involved
+- For animated accordions, use a custom element in a paired `assets/component-*.js` file
 
 **Modals and Popups:**
 - Use `<dialog>` for modals instead of custom overlays
 - Built-in focus management and backdrop clicks
-- See the [dialog component](mdc:assets/dialog.js) for how we use these
+- See existing modal patterns in `snippets/component-product-media-modal.liquid` and `assets/component-product-media-modal.js`
 
 **Tooltips and Menus:**
 - Use `popover` attribute for floating content

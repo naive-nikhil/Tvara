@@ -4,6 +4,16 @@ alwaysApply: false
 ---
 # JavaScript Standards
 
+> Defers to `AGENTS.md` §4–§5 for Alpine stores, cart AJAX, and script placement.
+
+## Tvara-specific constraints
+
+- **No `<script>` tags in section/snippet `.liquid` files** — JS lives in paired `assets/section-*.js` or `assets/component-*.js`. Script tags for theme assets belong in `layout/theme.liquid` only.
+- **Reactive state** — use Alpine stores (`$store`). Do not use `querySelector` / `getElementById` to read or write cart counts, prices, or other reactive UI state.
+- **Local DOM inside custom elements** — `querySelector` within a custom element's `connectedCallback` is fine for wiring that element's own children.
+- **Cart mutations** — use `liquid-ajax-cart.js` events/API; never `fetch('/cart/add.js')` or `fetch('/cart/update.js')` directly.
+- **No CDN libraries** — Swiper, Alpine, etc. are local assets only.
+
 ## General Principles
 
 - **Zero external dependencies** - Use native browser APIs
@@ -143,7 +153,12 @@ if (!customElements.get('product-info')) {
   </quantity-selector>
 </product-info>
 
-<!-- Load component script -->
+<!-- Script loaded from layout/theme.liquid — not inline in sections/snippets (AGENTS.md §8) -->
+```
+
+Load paired JS from `layout/theme.liquid`:
+
+```liquid
 <script src="{{ 'component-product-info.js' | asset_url }}" defer="defer"></script>
 ```
 
@@ -308,10 +323,10 @@ class ProductInfo extends HTMLElement {
 }
 ```
 
-**Loading external scripts in Liquid templates:**
+**Loading external scripts** — register in `layout/theme.liquid`, not in section/snippet files:
 
 ```liquid
-<script src="{{ "swiper7.4.1.min.js" | asset_url }}" defer="defer" id="swiper-script"></script>
+<script src="{{ 'swiper7.4.1.min.js' | asset_url }}" defer="defer" id="swiper-script"></script>
 <script src="{{ 'component-product-info.js' | asset_url }}" defer="defer"></script>
 ```
 
