@@ -5,63 +5,33 @@ export class QuickAdd extends HTMLElement {
     this.modalContent = null;
     this.setupModal();
     this.bindEvents();
-    this.onCartRequestEnd = this.onCartRequestEnd.bind(this);
-    this.setupAjaxCartButtons();
+    this.onCartUpdated = this.onCartUpdated.bind(this);
   }
 
   connectedCallback() {
     if (!this.initialized) {
       this.initialized = true;
       document.body.appendChild(this);
-      document.addEventListener('liquid-ajax-cart:request-end', this.onCartRequestEnd);
+      window.addEventListener('tvara:cart:updated', this.onCartUpdated);
     }
-  }
-
-  setupAjaxCartButtons() {
-    document.addEventListener('submit', (event) => {
-      const form = event.target.closest('ajax-cart-product-form');
-      if (!form) return;
-
-      const button = form.querySelector('.quick-add__icon-button');
-      if (button) this.toggleSpinner(button, true);
-    });
-  }
-
-  toggleSpinner(button, show) {
-    const spinner = button.querySelector('.add-to-cart-icon-spinner');
-    const icon = button.querySelector('.add-to-cart-icon');
-    const text = button.querySelector('.add-to-cart-text__content');
-    
-    spinner?.classList.toggle('hidden', !show);
-    icon?.classList.toggle('hidden', show);
-    text?.classList.toggle('hidden', show);
   }
 
   disconnectedCallback() {
     if (this.initialized) {
-      document.removeEventListener('liquid-ajax-cart:request-end', this.onCartRequestEnd);
+      window.removeEventListener('tvara:cart:updated', this.onCartUpdated);
     }
   }
 
-  onCartRequestEnd(event) {
-    const { requestState } = event.detail || {};
-    if (requestState?.requestType === 'add' && requestState?.responseData?.ok) {
-      document.body.classList.remove('overflow-hidden');
+  onCartUpdated(event) {
+    if (event.detail?.action !== 'add') return;
 
-      document.querySelectorAll('quick-add-modal').forEach((modal) => {
-        modal.removeAttribute('open');
-        if (modal.modalContent) {
-          modal.modalContent.innerHTML = '';
-        }
-      });
+    document.body.classList.remove('overflow-hidden');
 
-      this.resetAllSpinners();
-    }
-  }
-
-  resetAllSpinners() {
-    document.querySelectorAll('.quick-add__icon-button').forEach((button) => {
-      this.toggleSpinner(button, false);
+    document.querySelectorAll('quick-add-modal').forEach((modal) => {
+      modal.removeAttribute('open');
+      if (modal.modalContent) {
+        modal.modalContent.innerHTML = '';
+      }
     });
   }
 
@@ -78,7 +48,6 @@ export class QuickAdd extends HTMLElement {
     this.addEventListener('click', (event) => {
       if (event.target === this) this.hide();
     });
-
   }
 
   show(opener) {
@@ -88,8 +57,8 @@ export class QuickAdd extends HTMLElement {
       opener.setAttribute('aria-disabled', true);
 
       fetch(opener.getAttribute('data-product-url'))
-        .then(response => response.text())
-        .then(responseText => {
+        .then((response) => response.text())
+        .then((responseText) => {
           const productElement = new DOMParser()
             .parseFromString(responseText, 'text/html')
             .querySelector('product-info');
@@ -105,19 +74,16 @@ export class QuickAdd extends HTMLElement {
           document.body.classList.add('overflow-hidden');
           this.setAttribute('open', '');
 
-          this.resetAllSpinners();
-
           if (window.Shopify?.PaymentButton) Shopify.PaymentButton.init();
           if (window.ProductModel) window.ProductModel.loadShopifyXR();
         })
-        .catch(error => {
+        .catch((error) => {
           console.error('Error loading product:', error);
         })
         .finally(() => {
           opener.removeAttribute('aria-disabled');
         });
     } else {
-      // For other modals (like monogram popup) that don't need fetch
       document.body.classList.add('overflow-hidden');
       this.setAttribute('open', '');
     }
@@ -146,20 +112,17 @@ export class QuickAdd extends HTMLElement {
 
   setContent(html) {
     this.modalContent.innerHTML = html;
-    // Reinject scripts
-    this.modalContent.querySelectorAll('script').forEach(oldScript => {
+    this.modalContent.querySelectorAll('script').forEach((oldScript) => {
       const newScript = document.createElement('script');
-      Array.from(oldScript.attributes).forEach(attr => {
+      Array.from(oldScript.attributes).forEach((attr) => {
         newScript.setAttribute(attr.name, attr.value);
       });
       newScript.textContent = oldScript.textContent;
       oldScript.parentNode.replaceChild(newScript, oldScript);
     });
   }
-
 }
 
 if (!customElements.get('quick-add-modal')) {
   customElements.define('quick-add-modal', QuickAdd);
 }
-

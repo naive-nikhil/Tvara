@@ -17,7 +17,7 @@ alwaysApply: true
 ## Non-negotiables (from AGENTS.md)
 
 - No CDN URLs — all JS/CSS/fonts served from `assets/`.
-- Cart AJAX via `liquid-ajax-cart.js` only — no direct `fetch('/cart/add.js')`.
+- Cart AJAX via `Alpine.store('cart')` in `theme-state.js` only — no direct `fetch('/cart/...')` in components.
 - Alpine stores for reactive state — no `querySelector` to sync cart/UI state.
 - Non-trivial JS in paired `assets/*.js` (Custom Elements); minimal few-line inline `<script>` in sections/snippets is OK per `AGENTS.md` §5b.
 - Never `DOMContentLoaded` — inline script after markup, or Custom Element `connectedCallback`.

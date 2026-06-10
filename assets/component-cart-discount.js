@@ -1,3 +1,5 @@
+import { getCartStore } from './theme-state.js';
+
 export class CartDiscountForm extends HTMLElement {
   connectedCallback() {
     this.form = this.querySelector('#cart-discount-form');
@@ -9,13 +11,25 @@ export class CartDiscountForm extends HTMLElement {
 
     if (!this.form) return;
 
-    this.form.addEventListener('submit', this.handleSubmit.bind(this));
-    this.codesList?.addEventListener('click', this.handleRemoveClick.bind(this));
+    this._onSubmit = this.handleSubmit.bind(this);
+    this._onRemoveClick = this.handleRemoveClick.bind(this);
+    this._onCartUpdated = this.handleCartUpdated.bind(this);
+
+    this.form.addEventListener('submit', this._onSubmit);
+    this.codesList?.addEventListener('click', this._onRemoveClick);
+    window.addEventListener('tvara:cart:updated', this._onCartUpdated);
   }
 
   disconnectedCallback() {
-    this.form?.removeEventListener('submit', this.handleSubmit.bind(this));
-    this.codesList?.removeEventListener('click', this.handleRemoveClick.bind(this));
+    this.form?.removeEventListener('submit', this._onSubmit);
+    this.codesList?.removeEventListener('click', this._onRemoveClick);
+    window.removeEventListener('tvara:cart:updated', this._onCartUpdated);
+  }
+
+  handleCartUpdated(event) {
+    const { cart, action } = event.detail || {};
+    if (!cart || action === 'error') return;
+    this.updatePills(cart);
   }
 
   showError(msg) {
@@ -42,38 +56,31 @@ export class CartDiscountForm extends HTMLElement {
     if (this.input) this.input.disabled = loading;
   }
 
-  async applyDiscount(codes) {
-    const res = await fetch(`${window.Shopify.routes.root}cart/update.js`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ discount: codes })
-    });
-
-    if (!res.ok) throw new Error(`Discount update failed: ${res.status}`);
-    return res.json();
-  }
-
   getExistingCodes() {
     return Array.from(this.querySelectorAll('.cart-discount__pill'))
-      .map(pill => pill.dataset.discountCode)
+      .map((pill) => pill.dataset.discountCode)
       .filter(Boolean);
   }
 
   getCartDiscountCodes(cart) {
     const codes = (cart.cart_level_discount_applications || [])
-      .filter(app => app.type === 'discount_code')
-      .map(app => app.title);
+      .filter((app) => app.type === 'discount_code')
+      .map((app) => app.title);
 
-    (cart.items || []).forEach(item => {
+    for (const item of cart.items || []) {
       if (item.discounts) {
-        item.discounts.forEach(d => d.title && codes.push(d.title));
+        for (const discount of item.discounts) {
+          if (discount.title) codes.push(discount.title);
+        }
       }
       if (item.line_level_discount_allocations) {
-        item.line_level_discount_allocations.forEach(a => {
-          if (a.discount_application?.title) codes.push(a.discount_application.title);
-        });
+        for (const allocation of item.line_level_discount_allocations) {
+          if (allocation.discount_application?.title) {
+            codes.push(allocation.discount_application.title);
+          }
+        }
       }
-    });
+    }
 
     return [...new Set(codes)];
   }
@@ -93,7 +100,9 @@ export class CartDiscountForm extends HTMLElement {
     removeBtn.setAttribute('aria-label', `Remove discount ${code}`);
 
     const existingIcon = this.querySelector('.cart-discount__pill-remove')?.innerHTML;
-    removeBtn.innerHTML = existingIcon || '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 4L4 12M4 4l8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+    removeBtn.innerHTML =
+      existingIcon ||
+      '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 4L4 12M4 4l8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
 
     li.appendChild(codeP);
     li.appendChild(removeBtn);
@@ -105,25 +114,27 @@ export class CartDiscountForm extends HTMLElement {
 
     const allDiscountCodes = this.getCartDiscountCodes(cart);
     const currentCodes = this.getExistingCodes();
-    const currentPills = Array.from(this.codesList.querySelectorAll('.cart-discount__pill'));
 
-    currentPills.forEach(pill => {
+    for (const pill of this.codesList.querySelectorAll('.cart-discount__pill')) {
       const code = pill.dataset.discountCode;
-      if (!allDiscountCodes.some(c => c.toUpperCase() === code.toUpperCase())) {
+      if (!allDiscountCodes.some((c) => c.toUpperCase() === code.toUpperCase())) {
         pill.remove();
       }
-    });
+    }
 
-    allDiscountCodes.forEach(code => {
-      if (!currentCodes.some(c => c.toUpperCase() === code.toUpperCase())) {
+    for (const code of allDiscountCodes) {
+      if (!currentCodes.some((c) => c.toUpperCase() === code.toUpperCase())) {
         this.codesList.appendChild(this.createPill(code));
       }
-    });
+    }
   }
 
   async handleSubmit(event) {
     event.preventDefault();
     this.hideError();
+
+    const store = getCartStore();
+    if (!store) return;
 
     const code = this.input?.value.trim();
     if (!code) {
@@ -132,7 +143,7 @@ export class CartDiscountForm extends HTMLElement {
     }
 
     const existing = this.getExistingCodes();
-    if (existing.some(c => c.toUpperCase() === code.toUpperCase())) {
+    if (existing.some((c) => c.toUpperCase() === code.toUpperCase())) {
       this.input.value = '';
       return;
     }
@@ -140,19 +151,11 @@ export class CartDiscountForm extends HTMLElement {
     this.setLoading(true);
     try {
       const allCodes = [...existing, code].join(',');
-      await this.applyDiscount(allCodes);
-
-      const cart = await fetch(`${window.Shopify.routes.root}cart.js`).then(r => r.json());
-      const cartCodes = this.getCartDiscountCodes(cart);
-      const isApplied = cartCodes.some(c => c.toUpperCase() === code.toUpperCase());
+      const cart = await store.update({ discount: allCodes });
+      const isApplied = this.getCartDiscountCodes(cart).some((c) => c.toUpperCase() === code.toUpperCase());
 
       if (isApplied) {
         this.input.value = '';
-        this.updatePills(cart);
-
-        if (window.liquidAjaxCart?.update) {
-          window.liquidAjaxCart.update({}, {});
-        }
       } else {
         this.showError('That discount code is not valid.');
       }
@@ -168,6 +171,9 @@ export class CartDiscountForm extends HTMLElement {
     const removeBtn = event.target.closest('.cart-discount__pill-remove');
     if (!removeBtn) return;
 
+    const store = getCartStore();
+    if (!store) return;
+
     const pill = removeBtn.closest('.cart-discount__pill');
     const codeToRemove = pill?.dataset.discountCode;
     if (!codeToRemove) return;
@@ -180,24 +186,14 @@ export class CartDiscountForm extends HTMLElement {
 
     try {
       const existing = this.getExistingCodes();
-      const remaining = existing.filter(c => c.toUpperCase() !== codeToRemove.toUpperCase());
+      const remaining = existing.filter((c) => c.toUpperCase() !== codeToRemove.toUpperCase());
       const codes = remaining.length > 0 ? remaining.join(',') : '';
-
-      await this.applyDiscount(codes);
-
-      const cart = await fetch(`${window.Shopify.routes.root}cart.js`).then(r => r.json());
-      this.updatePills(cart);
-
-      if (window.liquidAjaxCart?.update) {
-        window.liquidAjaxCart.update({}, {});
-      }
+      await store.update({ discount: codes });
     } catch (err) {
       console.error(err);
       pill.classList.remove('cart-discount__pill--removing');
       removeBtn.disabled = false;
       this.showError('Something went wrong while removing the discount.');
-      const cart = await fetch(`${window.Shopify.routes.root}cart.js`).then(r => r.json());
-      this.updatePills(cart);
     }
   }
 }

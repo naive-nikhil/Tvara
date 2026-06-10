@@ -408,7 +408,13 @@
         {%- endif -%}
       >
         {{- 'icon-cart.svg' | inline_asset_content -}}
-        <div data-cart-count data-ajax-cart-bind="item_count">{{ cart.item_count }}</div>
+        <div
+          data-cart-count
+          x-show="$store.cart.item_count > 0"
+          x-text="$store.cart.item_count"
+        >
+          {{- cart.item_count -}}
+        </div>
       </a>
     </div>
 

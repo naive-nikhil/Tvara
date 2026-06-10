@@ -23,3 +23,13 @@ Short-lived log of non-obvious choices. Update when an agent or developer makes 
 **Decision:** One Shopify block **type** per region (`us`, `cad`, `uk`, `eur`, …). Liquid at the top of `announcement-bar.liquid` maps `localization.country.iso_code` (and `currency.iso_code == 'EUR'` for Eurozone) to the active type. Only matching blocks render; fallback to `us` if none configured. Legacy types `announcement_us` / `announcement` still match US.
 
 **Consequences:** Merchants add/configure each regional block in the theme editor. Country→block mapping lives in the section liquid; extend the `case` / EUR rule when adding regions.
+
+---
+
+## ADR-003 — Native cart via theme-state.js (2026-06-10)
+
+**Context:** `liquid-ajax-cart.js` fires redundant network calls (minimum add + update for section HTML) and binds cart UI through imperative DOM attributes. The theme needs sub-1s cart mutations and a single Alpine store consumed by header, drawer, and cart page.
+
+**Decision:** Replace `liquid-ajax-cart.js` with a native cart layer in `assets/theme-state.js`. All Cart AJAX API calls go **only** through `Alpine.store('cart')` methods in that file. Dispatch `tvara:cart:updated` after mutations.
+
+**Consequences:** `AGENTS.md` §3 and forbidden-action #2 updated. All cart UI binds to `$store.cart`. `liquid-ajax-cart-v2.1.1.js` removed in Phase 6 (2026-06-10). Components use `tvara:cart:updated` exclusively.

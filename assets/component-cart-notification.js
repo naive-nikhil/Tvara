@@ -1,76 +1,82 @@
-/**
- * Docs: docs/assets/component-cart-notification.md
- * @extends HTMLElement
- */
 export class CartNotification extends HTMLElement {
-  /**
-   * Sets up button handlers and subscribes to AJAX cart updates.
-   */
-  constructor() {
-    super();
+  connectedCallback() {
     this.hideNotification = this.hideNotification.bind(this);
-    this.querySelector('.cart-notification-continue_shopping').addEventListener('click', () => this.hideNotification());
-    this.querySelector('.cart-notification__close').addEventListener('click', () => this.hideNotification());
-    document.addEventListener('liquid-ajax-cart:request-end', this.onCartUpdate.bind(this));
+    this.onCartUpdated = this.onCartUpdated.bind(this);
+
+    this.querySelector('.cart-notification-continue_shopping')?.addEventListener('click', this.hideNotification);
+    this.querySelector('.cart-notification__close')?.addEventListener('click', this.hideNotification);
+    window.addEventListener('tvara:cart:updated', this.onCartUpdated);
   }
 
-  /**
-   * Removes listeners when the element detaches from the DOM.
-   */
   disconnectedCallback() {
-    this.querySelector('.cart-notification-continue_shopping').removeEventListener('click', this.hideNotification);
-    this.querySelector('.cart-notification__close').removeEventListener('click', this.hideNotification);
-    document.removeEventListener('liquid-ajax-cart:request-end', this.onCartUpdate.bind(this));
+    this.querySelector('.cart-notification-continue_shopping')?.removeEventListener('click', this.hideNotification);
+    this.querySelector('.cart-notification__close')?.removeEventListener('click', this.hideNotification);
+    window.removeEventListener('tvara:cart:updated', this.onCartUpdated);
   }
 
-  /**
-   * Handles Liquid Ajax Cart responses and updates the UI after successful adds.
-   * @param {CustomEvent} event - Liquid Ajax Cart completion event.
-   */
-  onCartUpdate(event) {
-    const { requestState } = event.detail;
-    if (requestState?.requestType === 'add' && requestState.responseData?.ok) {
-      this.updateNotification(requestState.responseData.body)
+  onCartUpdated(event) {
+    const { action, lineItem } = event.detail || {};
+    if (action !== 'add' || !lineItem) return;
+    this.updateNotification(lineItem);
+  }
+
+  updateNotification(lineItem) {
+    const container = this.querySelector('#cart-notification-product');
+    if (!container) return;
+
+    container.replaceChildren();
+
+    const imageWrap = document.createElement('div');
+    imageWrap.className = 'cart-notification-product__image';
+
+    const image = document.createElement('img');
+    image.width = 70;
+    image.height = 70;
+    image.alt = lineItem.featured_image?.alt || lineItem.product_title || '';
+    image.src = lineItem.image || lineItem.featured_image?.url || '';
+    imageWrap.appendChild(image);
+
+    const details = document.createElement('div');
+
+    const vendor = document.createElement('p');
+    vendor.className = 'caption-with-letter-spacing';
+    vendor.textContent = lineItem.vendor || '';
+    details.appendChild(vendor);
+
+    const title = document.createElement('h3');
+    title.className = 'cart-notification-product__name h4';
+    title.textContent = lineItem.product_title || '';
+    details.appendChild(title);
+
+    const optionsList = document.createElement('dl');
+    for (const option of lineItem.options_with_values || []) {
+      const row = document.createElement('div');
+      row.className = 'product-option';
+
+      const dt = document.createElement('dt');
+      dt.textContent = `${option.name}: `;
+
+      const dd = document.createElement('dd');
+      dd.textContent = option.value;
+
+      row.appendChild(dt);
+      row.appendChild(dd);
+      optionsList.appendChild(row);
     }
-  }
+    details.appendChild(optionsList);
 
-  /**
-   * Renders the latest product info inside the notification drawer.
-   * @param {Object} updatedCartNotification - JSON payload returned from the cart request.
-   */
-  updateNotification(updatedCartNotification) {
-    const productElement = this.querySelector('#cart-notification-product');
-    const optionsHTML = updatedCartNotification.options_with_values
-      .map((option) => `<div class="product-option"><dt>${option.name}: </dt><dd>${option.value}</dd></div>`)
-      .join('');
+    container.appendChild(imageWrap);
+    container.appendChild(details);
 
-    const productHTML = `
-        <div class="cart-notification-product__image">
-          <img src="${updatedCartNotification.image}" alt="${updatedCartNotification.featured_image.alt}" width="70" height="70">
-        </div>
-        <div>
-          <p class="caption-with-letter-spacing">Shopify</p>
-          <h3 class="cart-notification-product__name h4">${updatedCartNotification.product_title}</h3>
-          <dl>${optionsHTML}</dl>
-        </div>
-      `;
-
-    productElement.innerHTML = productHTML;
     this.showNotification();
   }
 
-  /**
-   * Displays the cart notification drawer.
-   */
   showNotification() {
-    this.querySelector('#cart-notification').classList.add('cart-notification-open');
+    this.querySelector('#cart-notification')?.classList.add('cart-notification-open');
   }
 
-  /**
-   * Hides the cart notification drawer.
-   */
   hideNotification() {
-    this.querySelector('#cart-notification').classList.remove('cart-notification-open');
+    this.querySelector('#cart-notification')?.classList.remove('cart-notification-open');
   }
 }
 

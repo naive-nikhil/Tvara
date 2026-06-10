@@ -1,21 +1,19 @@
 export class CartDrawer extends HTMLElement {
   constructor() {
     super();
-    this.onCartRequestEnd = this.onCartRequestEnd.bind(this);
+    this.onCartUpdated = this.onCartUpdated.bind(this);
   }
 
   connectedCallback() {
-    document.addEventListener('liquid-ajax-cart:request-end', this.onCartRequestEnd);
+    window.addEventListener('tvara:cart:updated', this.onCartUpdated);
   }
 
   disconnectedCallback() {
-    document.removeEventListener('liquid-ajax-cart:request-end', this.onCartRequestEnd);
+    window.removeEventListener('tvara:cart:updated', this.onCartUpdated);
   }
 
-  onCartRequestEnd(event) {
-    const { requestState } = event.detail || {};
-    if (requestState?.requestType === 'add' && requestState?.responseData?.ok) {
-      // Open cart drawer via Alpine on header
+  onCartUpdated(event) {
+    if (event.detail?.action === 'add') {
       window.dispatchEvent(new CustomEvent('cart-open'));
     }
   }
@@ -24,5 +22,3 @@ export class CartDrawer extends HTMLElement {
 if (!customElements.get('cart-drawer')) {
   customElements.define('cart-drawer', CartDrawer);
 }
-
-

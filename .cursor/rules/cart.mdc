@@ -1,0 +1,34 @@
+---
+description: Cart mutations and Alpine cart store — defers to AGENTS.md and theme-state.js
+globs: "**/cart*,**/component-cart*,**/theme-state.js,**/header.liquid"
+alwaysApply: false
+---
+
+# Cart
+
+> **Authority:** `AGENTS.md` §3–§4, `DECISIONS.md` ADR-003, `assets/theme-state.js`.
+
+## Mutations
+
+- All Cart AJAX API calls go through **`Alpine.store('cart')`** in `assets/theme-state.js`:
+  - `add(variantId, quantity, properties?)`
+  - `change(lineKey, quantity)`
+  - `update(updates)` — discounts, note, attributes
+  - `fetchCart()` — reconcile from `/cart.js`
+- Requests are **serialized** via an internal queue in `theme-state.js`.
+- Set `loading: true` before fetch, `false` in `finally`.
+
+## Events
+
+- After every successful mutation or sync, `theme-state.js` dispatches **`tvara:cart:updated`** on `window` with `{ action, cart, lineItem?, error? }`.
+- Components listen for `tvara:cart:updated`.
+
+## UI binding
+
+- Cart count, totals, and line items bind via Alpine (`x-text`, `x-for`, `:disabled`) to `$store.cart` — never `querySelector`.
+- SSR fallback values in Liquid are OK; Alpine overwrites on init.
+
+## Forbidden
+
+- `fetch('/cart/add.js')` (or change/update/clear) in component or section JS.
+- Mutating `$store.cart.items` directly — use store methods; they apply server JSON via `applyCart`.

@@ -89,8 +89,15 @@
   flex-shrink: 0;
 }
 
-[data-ajax-cart-errors]:empty+svg {
+.cart-item__errors:has(.cart-item__error-text:empty) svg,
+.cart-item__errors:not(:has(.cart-item__error-text:not(:empty))) svg {
   display: none;
+}
+
+.cart-form__error:not([hidden]) {
+  color: rgb(var(--color-foreground));
+  font-size: 1.4rem;
+  margin-bottom: 1rem;
 }
 
 .cart-item__media img {
@@ -193,14 +200,22 @@
   width: 14px;
 }
 
-.cart-item__remove a {
+.cart-item__remove a,
+.cart-item__remove button {
   font-size: 12px;
   color: rgba(var(--color-foreground), 0.5);
   text-decoration: none;
   text-transform: uppercase;
 }
 
-ajax-cart-quantity {
+.cart-item__remove button {
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  padding: 0;
+}
+
+cart-quantity {
   display: grid;
   grid-template-columns: 30px 60px 30px;
   border: .1rem solid rgba(var(--color-foreground), .2);
@@ -208,32 +223,35 @@ ajax-cart-quantity {
   max-width: 128px;
 }
 
-ajax-cart-quantity a {
+cart-quantity button {
   display: grid;
   place-items: center;
   padding-block: 5px;
   color: rgba(var(--color-foreground));
+  background: transparent;
+  border: 0;
+  cursor: pointer;
 }
 
-ajax-cart-quantity input {
+cart-quantity input {
   border: 0;
   text-align: center;
   background: transparent;
   color: rgba(var(--color-foreground));
 }
 
-ajax-cart-quantity input::-webkit-outer-spin-button,
-ajax-cart-quantity input::-webkit-inner-spin-button {
+cart-quantity input::-webkit-outer-spin-button,
+cart-quantity input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-ajax-cart-quantity input {
+cart-quantity input {
   appearance: textfield;
   -moz-appearance: textfield;
 }
 
-ajax-cart-quantity svg {
+cart-quantity svg {
   width: 14px;
   height: auto;
 }
@@ -327,7 +345,8 @@ span.cart-total__label {
   margin-right: 0.5rem;
 }
 
-form#my-ajax-cart-form button {
+form#cart-drawer-form button,
+form#cart-page-form button {
   border: 1px solid rgb(var(--color-button));
   background: rgb(var(--color-button));
   color: rgb(var(--color-button-text));
@@ -340,7 +359,7 @@ form#my-ajax-cart-form button {
   font-weight: 600;
 }
 
-html.js-ajax-cart-processing .cart-items {
+html.js-cart-processing .cart-items {
   opacity: 0.7;
 }
 
@@ -503,11 +522,12 @@ h2.cart__empty-text {
     font-size: 1.2rem;
   }
 
-  form#my-ajax-cart-form button {
+  form#cart-drawer-form button,
+  form#cart-page-form button {
     font-size: 1.4rem;
   }
 
-  ajax-cart-quantity {
+  cart-quantity {
     width: 100%;
     max-width: 125px;
   }

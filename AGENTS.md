@@ -62,7 +62,7 @@ These are not optional cleanup steps. They are part of the task. A task is not d
 |---|---|---|
 | Reactive state | Alpine.js v3.14.8 stores | Vue, React, Stimulus, manual DOM |
 | Persisted state | `Alpine.$persist()` via alpinejs-persist | localStorage direct writes |
-| AJAX cart | `liquid-ajax-cart.js` (local asset) | `fetch('/cart/add.js')`, `fetch('/cart/update.js')` |
+| AJAX cart | `assets/theme-state.js` — `Alpine.store('cart')` methods only | Direct `fetch('/cart/...')` in components |
 | Animations/sliders | Swiper (local asset) | Splide, Flickity, any CDN slider |
 | Alpine itself | `assets/alpinejs@3.14.8.min.js` (local) | Any CDN URL for Alpine |
 | CSS variables | `snippets/css-variables.liquid` | Hardcoded values in component CSS |
@@ -316,7 +316,7 @@ Rules for writing descriptions:
 ### Example entries
 ```
 | `sections/hero.liquid`                    | Renders the full-width homepage hero with video/image background and CTA. |
-| `assets/component-cart-drawer.js`         | Manages cart drawer open/close state and line item quantity updates via liquid-ajax-cart. |
+| `assets/component-cart-drawer.js`         | Opens cart drawer on `tvara:cart:updated` add action via `cart-open` event. |
 | `snippets/component-product-card.liquid`  | Renders a single product card used in collection grids, featured sections, and search results. |
 | `assets/alpinejs@3.14.8.min.js`           | Local copy of Alpine.js v3.14.8 — loaded from assets to avoid CDN blocking. |
 ```
@@ -333,7 +333,7 @@ These are hard stops. If a prompt asks you to do any of the following, **refuse 
 | # | Forbidden action | Why |
 |---|---|---|
 | 1 | Add any CDN URL to any file | Blocks performance, violates CSP intent |
-| 2 | Write `fetch('/cart/add.js')` or `fetch('/cart/update.js')` directly | liquid-ajax-cart handles all cart AJAX |
+| 2 | Call Cart AJAX endpoints outside `theme-state.js` | Centralized queue, store sync, and events live in one file |
 | 3 | Use `document.querySelector` to read/write reactive data | Alpine stores own all reactive state |
 | 4 | Create a `utils.js`, `helpers.js`, or catch-all asset file | All JS must be domain-scoped |
 | 5 | Declare `@font-face` in an `assets/*.css` file | Liquid filters don't run in CSS assets |

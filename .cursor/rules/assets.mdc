@@ -17,4 +17,4 @@ Any images that are required in the code, including icons, may be stored within 
 - **Domain-scoped JS/CSS only** — `section-{name}.*` or `component-{name}.*`; no `utils.js` or catch-all files.
 - **Static CSS** — `assets/*.css` cannot use Liquid. Tokens belong in `snippets/css-variables.liquid`.
 - **`@font-face`** — declare only in `layout/theme.liquid`, never in asset CSS files.
-- **Cart AJAX** — use `liquid-ajax-cart.js`; do not call cart endpoints directly from component JS.
+- **Cart AJAX** — use `Alpine.store('cart')` methods in `theme-state.js`; do not call cart endpoints from component JS.

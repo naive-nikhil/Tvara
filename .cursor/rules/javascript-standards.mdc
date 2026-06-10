@@ -11,7 +11,7 @@ alwaysApply: false
 - **JS placement (`AGENTS.md` §5b)** — Non-trivial behavior lives in paired `assets/section-*.js` or `assets/component-*.js` as Custom Elements. A minimal inline `<script>` (few lines, no lifecycle) after the related markup is acceptable (e.g. one-off CSS variable from measured height). `<script src="...">` for theme assets belongs in `layout/theme.liquid` or at the section level when loading a paired asset file.
 - **Reactive state** — use Alpine stores (`$store`). Do not use `querySelector` / `getElementById` to read or write cart counts, prices, or other reactive UI state.
 - **Local DOM inside custom elements** — `querySelector` within a custom element's `connectedCallback` is fine for wiring that element's own children.
-- **Cart mutations** — use `liquid-ajax-cart.js` events/API; never `fetch('/cart/add.js')` or `fetch('/cart/update.js')` directly.
+- **Cart mutations** — call `Alpine.store('cart').add|change|update|fetchCart()` from `theme-state.js` only; never `fetch('/cart/add.js')` or similar from component JS. Listen for `tvara:cart:updated` (not `liquid-ajax-cart:*`) in new code.
 - **No CDN libraries** — Swiper, Alpine, etc. are local assets only.
 
 ## General Principles
@@ -82,7 +82,7 @@ if (!customElements.get('product-info')) {
       this.quantitySelector.querySelector('button[name="plus"]').addEventListener('click', this.onQuantitySelectorEvent.bind(this));
       this.quantitySelector.querySelector('button[name="minus"]').addEventListener('click', this.onQuantitySelectorEvent.bind(this));
       document.getElementById('swiper-script').addEventListener('load', this.initSwiper.bind(this));
-      document.addEventListener('liquid-ajax-cart:request-end', this.onCartUpdate.bind(this));
+      document.addEventListener('tvara:cart:updated', this.onCartUpdate.bind(this));
     }
 
     connectedCallback() {
@@ -257,7 +257,7 @@ class ProductInfo extends HTMLElement {
 
   setupEventListeners() {
     // Listen to third-party library events
-    document.addEventListener('liquid-ajax-cart:request-end', this.onCartUpdate.bind(this));
+    window.addEventListener('tvara:cart:updated', this.onCartUpdate.bind(this));
     // Listen to own component events
     this.variantSelector?.addEventListener('change', this.onVariantChange.bind(this));
   }

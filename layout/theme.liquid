@@ -46,18 +46,15 @@
       <script src="{{ 'swiper7.4.1.min.js' | asset_url }}" defer="defer"></script>
     {% endif %}
 
-    {% comment %} Alpine.js {% endcomment %}
+    {% comment %} Alpine.js — theme-state.js must register alpine:init before Alpine loads {% endcomment %}
     <script src="{{ 'alpine-persist@3.15.12.min.js' | asset_url }}" defer="defer"></script>
+    <script src="{{ 'theme-state.js' | asset_url }}" type="module"></script>
     <script src="{{ 'alpine@3.15.12.min.js' | asset_url }}" defer="defer"></script>
     <script src="{{ 'theme.js' | asset_url }}" type="module"></script>
+    <script src="{{ 'component-cart-form.js' | asset_url }}" type="module"></script>
 
-    {% comment %} liquid-ajax-cart.js.org {% endcomment %}
-    <script type="application/json" data-ajax-cart-initial-state>
+    <script type="application/json" data-tvara-cart-initial-state>
       {{ cart | json }}
-    </script>
-
-    <script type="module">
-      import '{{ "liquid-ajax-cart-v2.1.1.js" | asset_url }}';
     </script>
 
     {%- if settings.predictive_search_enabled -%}

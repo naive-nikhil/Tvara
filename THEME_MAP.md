@@ -25,7 +25,7 @@ Rules for writing and updating descriptions:
 
 | File | Description |
 |---|---|
-| `layout/theme.liquid` | Root layout shell — loads all assets, injects `@font-face` declarations, renders header/footer groups, and Alpine.js. |
+| `layout/theme.liquid` | Root layout shell — loads Alpine, theme-state.js, fonts, header/footer groups; cart JSON bootstrap for native store and migration bridge. |
 | `layout/password.liquid` | Renders the storefront password page for pre-launch access control. |
 
 ---
@@ -51,7 +51,7 @@ Rules for writing and updating descriptions:
 
 | File | Description |
 |---|---|
-| `sections/header.liquid` | Renders the global site header with logo, navigation, search trigger, and cart icon. |
+| `sections/header.liquid` | Renders the global site header with logo, navigation, search trigger, cart icon bound to `$store.cart.item_count`, and optional drawer state. |
 | `sections/footer.liquid` | Renders the global site footer with links, newsletter, and social icons. |
 | `sections/cart.liquid` | Renders the dedicated cart page with line items, discount input, and checkout button. |
 | `sections/product.liquid` | Renders the full product detail section with gallery, variant picker, and add-to-cart. |
@@ -81,7 +81,9 @@ Each snippet also carries a **component contract header** (comment block at the 
 
 | File | Description |
 |---|---|
-| `snippets/component-cart-drawer.liquid` | Renders the slide-out cart drawer with line items, quantity controls, and checkout CTA. |
+| `snippets/component-cart-drawer.liquid` | Renders the slide-out cart drawer with Alpine-bound line items, totals, and checkout CTA. |
+| `snippets/component-cart-items.liquid` | Renders cart line items from `$store.cart.items` via Alpine `x-for`. |
+| `snippets/component-cart-charges.liquid` | Renders cart discounts and estimated total from `$store.cart`. |
 | `snippets/component-product-card.liquid` | Renders a single product card used in collection grids, featured sections, and search results. |
 | `snippets/component-filters-*.liquid` | Renders filter UI controls (facets, price range, swatches) for collection and search pages. |
 | `snippets/component-nav-*.liquid` | Renders navigation elements (desktop mega-menu, mobile drawer) used by the header section. |
@@ -103,26 +105,35 @@ Each snippet also carries a **component contract header** (comment block at the 
 
 | File | Description |
 |---|---|
-| `assets/theme-state.js` | Registers all global Alpine stores (cart, bundle, UI) inside the `alpine:init` event — the single initialization point for cross-component shared state. |
+| `assets/theme-state.js` | Registers Alpine cart store, exports `getCartStore`, serializes Cart AJAX via `runMutation`, and dispatches `tvara:cart:updated`. |
 
 ### Registered global stores
 
 These are the Alpine stores initialized in `theme-state.js`. Update this table whenever a store is added, modified, or removed.
 
 #### `Alpine.store('cart')`
-Manages live cart state synced from Shopify. Consumed by the header cart icon, cart drawer, and cart page.
+Manages live cart state synced from Shopify. Consumed by the header cart icon, cart drawer, and cart page. All Cart AJAX calls go through this store (`assets/theme-state.js`).
 
 | Property | Type | Description |
 |---|---|---|
 | `items` | `Array` | Line items currently in the cart. |
 | `item_count` | `Number` | Total item quantity — used for the cart badge. |
+| `total_price` | `Number` | Cart subtotal in cents. |
+| `currency` | `String` | Active cart currency code. |
 | `loading` | `Boolean` | True while a cart fetch is in flight — use to show spinners. |
-| `fetchCart()` | `async fn` | Fetches `/cart.js` and updates `items` and `item_count`. |
+| `error` | `String\|null` | Last cart API error message, cleared on next request. |
+| `fetchCart()` | `async fn` | GET `/cart.js` and updates store via `applyCart`. |
+| `add(variantId, qty, props?)` | `async fn` | POST `/cart/add.js`, then GET `/cart.js` to reconcile. |
+| `change(lineKey, qty)` | `async fn` | POST `/cart/change.js`; response replaces store. |
+| `update(updates)` | `async fn` | POST `/cart/update.js`; response replaces store. |
+| `applyCart(cart)` | `fn` | Applies server cart JSON and dispatches `tvara:cart:updated`. |
+| `formatMoney(cents)` | `fn` | Formats cart money values for Alpine templates. |
+| `itemProperties(item)` | `fn` | Returns visible line item properties (excludes `_` prefix). |
 
 **Rules:**
-- `liquid-ajax-cart.js` triggers cart mutations. Do not call `/cart/add.js` or `/cart/update.js` directly.
+- Cart AJAX only inside `theme-state.js` — components call store methods, never `fetch('/cart/...')` directly.
 - `loading` must be set to `true` before any fetch and `false` in the finally block.
-- Never mutate `items` directly — always re-fetch via `fetchCart()` after a mutation.
+- Never mutate `items` directly — use `applyCart` or store methods after server response.
 
 ---
 
@@ -162,7 +173,11 @@ Manages the bundle builder selection state, persisted to localStorage across pag
 
 | File | Description |
 |---|---|
-| `assets/component-cart-drawer.js` | Manages cart drawer open/close animation and quantity update interactions via liquid-ajax-cart. |
+| `assets/component-cart-drawer.js` | Opens the cart drawer on successful add via `tvara:cart:updated` and `cart-open` event. |
+| `assets/component-cart-form.js` | Intercepts product add-to-cart forms and calls `Alpine.store('cart').add()`. |
+| `assets/component-cart-quantity.js` | Handles line item quantity changes and debounced input via `Alpine.store('cart').change()`. |
+| `assets/component-cart-notification.js` | Shows add-to-cart notification panel from `tvara:cart:updated` line item data. |
+| `assets/component-cart-discount.js` | Applies and removes discount codes via `Alpine.store('cart').update()`. |
 
 > Add new `assets/component-*.js` rows here when created.
 
@@ -172,11 +187,11 @@ Manages the bundle builder selection state, persisted to localStorage across pag
 
 | File | Description |
 |---|---|
-| `assets/theme.js` | Primary theme JS entry — initializes Alpine, loads stores, and sets up global event listeners. |
+| `assets/theme.js` | Shared utilities (debounce) imported by section/component modules — not the cart entry point. |
 | `assets/shopify.js` | Shopify-specific helpers — formatMoney, image size utilities, and section event handling. |
 | `assets/customer.js` | Handles customer account page interactions — address management and order display. |
-| `assets/alpinejs@3.14.8.min.js` | Local copy of Alpine.js v3.14.8 — served from assets to eliminate CDN dependency. |
-| `assets/alpinejs-persist@3.14.8.min.js` | Local copy of the Alpine Persist plugin — enables `$persist` for localStorage-backed store properties. |
+| `assets/alpine@3.15.12.min.js` | Local copy of Alpine.js v3.15.12 — loaded from assets to avoid CDN blocking. |
+| `assets/alpine-persist@3.15.12.min.js` | Local copy of the Alpine Persist plugin — enables `$persist` for localStorage-backed store properties. |
 
 ---
 
@@ -217,7 +232,7 @@ Cursor IDE loads `.mdc` files automatically based on the `globs` pattern defined
 | File | Applies to | Description |
 |---|---|---|
 | `.cursor/rules/global.mdc` | `**/*` | Universal rules — stack constraints, naming conventions, RPI protocol reminder. |
-| `.cursor/rules/cart.mdc` | `**/cart*`, `**/component-cart*` | Cart-specific rules — liquid-ajax-cart only, store mutation rules. |
+| `.cursor/rules/cart.mdc` | `**/cart*`, `**/component-cart*`, `**/theme-state.js` | Cart store methods, `tvara:cart:updated` events, no direct cart fetch in components. |
 | `.cursor/rules/product.mdc` | `**/product*` | Product page rules — Alpine store bindings, variant picker constraints. |
 | `.cursor/rules/typography.mdc` | `**/*.css`, `**/theme.liquid` | Typography rules — @font-face placement, woff2 only, zero-CLS checklist. |
 | `.cursor/rules/state.mdc` | `**/theme-state.js`, `**/*.js` | State rules — store initialization pattern, no querySelector for reactive data. |
@@ -232,5 +247,7 @@ Cursor IDE loads `.mdc` files automatically based on the `globs` pattern defined
 |---|---|---|
 | Iteration 1 | Initial setup | File created — stub entries for all known files. Section and asset stubs need filling as codebase is confirmed. |
 | 2026-06-01 | Announcement bar agent | Added `sections/announcement-bar.liquid`; market block types, grid stable height, inline script for `--announcement-bar-height`. |
+| 2026-06-10 | Native cart Phase 0–1 | ADR-003; `assets/theme-state.js`; header badge → `$store.cart`; AGENTS/cart rules updated. |
+| 2026-06-10 | Native cart cleanup | DRY `runMutation`, shared `getCartStore`, lifecycle fixes, removed duplicate discount pill updates. |
 
 > Every agent and developer appends a row here when they update the map.

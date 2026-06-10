@@ -1,0 +1,28 @@
+{% comment %}
+  Component: Cart Charges
+  File: snippets/component-cart-charges.liquid
+
+  Props: none
+  Stores: $store.cart (cart_level_discount_applications, total_price, formatMoney)
+  CSS API: .cart-charges, .cart-discounts, .cart-total
+{% endcomment %}
+
+<div class="cart-charges">
+  <ul class="cart-discounts" x-show="$store.cart.cart_level_discount_applications?.length">
+    <template
+      x-for="discount in $store.cart.cart_level_discount_applications"
+      :key="discount.title"
+    >
+      <li>
+        {{- 'icon-discount.svg' | inline_asset_content -}}
+        <span x-text="`${discount.title} (-${$store.cart.formatMoney(discount.total_allocated_amount)})`"></span>
+      </li>
+    </template>
+  </ul>
+
+  <div class="cart-total">
+    <span class="cart-total__label">{{ 'cart.estimated_total' | t }}</span>
+    <span x-text="$store.cart.formatMoney($store.cart.total_price)"></span>
+  </div>
+  <small class="cart-total__small">{{ 'cart.taxes_and_shipping_policy' | t }}</small>
+</div>
