@@ -241,6 +241,14 @@ Cursor IDE loads `.mdc` files automatically based on the `globs` pattern defined
 
 ---
 
+## library/
+
+| File | Description |
+|---|---|
+| `library/cart-client.js` | V1 vanilla Cart AJAX client — data-attribute bindings, serialized mutations, SSR hydration, `cart:updated` / `cart:error` events; exposes `window.CartClient`. |
+
+---
+
 ## Map maintenance log
 
 | Date | Changed by | What changed |
@@ -249,5 +257,6 @@ Cursor IDE loads `.mdc` files automatically based on the `globs` pattern defined
 | 2026-06-01 | Announcement bar agent | Added `sections/announcement-bar.liquid`; market block types, grid stable height, inline script for `--announcement-bar-height`. |
 | 2026-06-10 | Native cart Phase 0–1 | ADR-003; `assets/theme-state.js`; header badge → `$store.cart`; AGENTS/cart rules updated. |
 | 2026-06-10 | Native cart cleanup | DRY `runMutation`, shared `getCartStore`, lifecycle fixes, removed duplicate discount pill updates. |
+| 2026-06-11 | cart-client V1 | Added `library/cart-client.js` — distributable data-attribute cart library. |
 
 > Every agent and developer appends a row here when they update the map.
