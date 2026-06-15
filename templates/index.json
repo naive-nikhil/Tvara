@@ -12,11 +12,12 @@
     "hero_1": {
       "type": "hero",
       "settings": {
-        "color_scheme": "scheme-3",
+        "color_scheme": "scheme-2",
         "background_type": "image",
+        "image_background": "shopify://shop_images/Main_b9e0da7f-db89-4d41-83f0-7f417b02831d.jpg",
         "video_background_url": "",
         "overlay_color": "#e8e1e1",
-        "overlay_opacity": 30,
+        "overlay_opacity": 55,
         "content_alignment": "center",
         "vertical_alignment": "center",
         "stars_text": "",
@@ -25,11 +26,13 @@
         "button_text": "Shop Now",
         "button_link": "shopify://collections/cam-plans",
         "button_background_color": "#ffffff",
-        "button_text_color": "#000000",
+        "button_text_color": "#791BED",
         "show_endorsement": false,
         "endorsement_name": ""
       }
     }
   },
-  "order": ["hero_1"]
+  "order": [
+    "hero_1"
+  ]
 }
