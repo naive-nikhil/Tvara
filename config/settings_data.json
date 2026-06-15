@@ -42,6 +42,7 @@
           "text": "#000000",
           "button": "#121212",
           "button_label": "#ffffff",
+          "secondary_button": "#FFFFFF",
           "secondary_button_label": "#121212",
           "shadow": "#121212"
         }
@@ -53,6 +54,7 @@
           "text": "#121212",
           "button": "#121212",
           "button_label": "#f3f3f3",
+          "secondary_button": "#FFFFFF",
           "secondary_button_label": "#121212",
           "shadow": "#121212"
         }
@@ -64,6 +66,7 @@
           "text": "#ffffff",
           "button": "#ffffff",
           "button_label": "#000000",
+          "secondary_button": "#FFFFFF",
           "secondary_button_label": "#ffffff",
           "shadow": "#121212"
         }
@@ -75,6 +78,7 @@
           "text": "#ffffff",
           "button": "#ffffff",
           "button_label": "#121212",
+          "secondary_button": "#FFFFFF",
           "secondary_button_label": "#ffffff",
           "shadow": "#121212"
         }
@@ -83,9 +87,10 @@
         "settings": {
           "background": "#334fb4",
           "background_gradient": "",
-          "text": "#ed1b1b",
+          "text": "#EDE61B",
           "button": "#ffffff",
           "button_label": "#334fb4",
+          "secondary_button": "#FFFFFF",
           "secondary_button_label": "#ffffff",
           "shadow": "#121212"
         }

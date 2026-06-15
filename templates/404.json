@@ -7,14 +7,30 @@
  * made to this file may be overwritten.
  * ------------------------------------------------------------
  */
- {
+{
   "sections": {
     "main": {
       "type": "404",
-      "settings": {}
+      "settings": {
+        "color_scheme": ""
+      }
+    },
+    "brand_story_mX4iBL": {
+      "type": "brand-story",
+      "name": "Brand Story",
+      "settings": {
+        "color_scheme": "scheme-5",
+        "padding_top": 40,
+        "padding_bottom": 40,
+        "label_1": "OTHER BRANDS",
+        "label_2": "DEMO",
+        "heading": "Heading",
+        "description": "Description content will appear here."
+      }
     }
   },
   "order": [
-    "main"
+    "main",
+    "brand_story_mX4iBL"
   ]
 }
